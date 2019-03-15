@@ -30,7 +30,7 @@ class ActivityView(ModelView):
 
 class HistoryView(ModelView):
     datamodel = SQLAInterface(History)
-    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['created_by', FilterEqualFunction, get_user]]
 
 
 
@@ -46,7 +46,7 @@ def page_not_found(e):
     return render_template('404.html', base_template=appbuilder.base_template, appbuilder=appbuilder), 404
 
 db.create_all()
-#upload_project()
-#upload_activity()
+upload_project()
+upload_activity()
 
 

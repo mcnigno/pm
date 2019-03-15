@@ -6,8 +6,9 @@ def upload_project():
         prj = open('xls/progetti.csv')
         for line in prj:
                 row = Project(project=line)
+                row.created_by_fk = '1'
+                row.changed_by_fk = '1'
                 session.add(row)
-        prj.created_by_fk = '1'
         session.commit()
 
 def upload_activity():
@@ -15,8 +16,10 @@ def upload_activity():
         prj = open('xls/activities.csv')
         for line in prj:
                 row = Activity(activity=line)
+                row.created_by_fk = '1'
+                row.changed_by_fk = '1'
                 session.add(row)
-        prj.created_by_fk = '1'
+        
         session.commit()
 
 def upload_history():
