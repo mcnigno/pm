@@ -24,14 +24,17 @@ def get_user():
 """
 class ProjectView(ModelView):
     datamodel = SQLAInterface(Project)
+    list_columns = ['project']
 
 class ActivityView(ModelView):
     datamodel = SQLAInterface(Activity)
+    list_columns = ['activity']
 
 class HistoryView(ModelView):
     datamodel = SQLAInterface(History)
     base_filters = [['created_by', FilterEqualFunction, get_user]]
-
+    list_columns = ['date','project','activity','quantity']
+    edit_columns = ['date','project','activity','quantity']
 
 
 appbuilder.add_view(ProjectView, "Project", icon="fa-folder-open-o", category="My Category", category_icon='fa-envelope')

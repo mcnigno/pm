@@ -33,4 +33,5 @@ class History(Model, AuditMixin):
     project = relationship(Project)
     activity_id = Column(Integer, ForeignKey('activity.id'))
     activity = relationship(Activity)
+    quantity = Column(Integer, nullable=False)
 
