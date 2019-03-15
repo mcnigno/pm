@@ -47,6 +47,6 @@ def page_not_found(e):
 
 db.create_all()
 #upload_project()
-upload_activity()
+#upload_activity()
 
 
