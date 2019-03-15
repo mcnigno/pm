@@ -3,7 +3,7 @@ from app import db
 
 def upload_project():
         session = db.session
-        prj = open('xls/progetti.csv', encoding='utf-8')
+        prj = open('xls/progetti.csv', encoding='utf-8-sig')
         for line in prj:
                 row = Project(project=line)
                 row.created_by_fk = '1'
@@ -13,7 +13,7 @@ def upload_project():
 
 def upload_activity():
         session = db.session
-        prj = open('xls/activities.csv', encoding='utf-8')
+        prj = open('xls/activities.csv', encoding='utf-8-sig')
         for line in prj:
                 row = Activity(activity=line)
                 row.created_by_fk = '1'
