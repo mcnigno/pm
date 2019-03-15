@@ -35,7 +35,7 @@ class HistoryView(ModelView):
     base_filters = [['created_by', FilterEqualFunction, get_user]]
     list_columns = ['date','project','activity','quantity']
     edit_columns = ['date','project','activity','quantity']
-
+    add_columns = ['date','project','activity','quantity']
 
 appbuilder.add_view(ProjectView, "Project", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
 appbuilder.add_view(ActivityView, "Activity", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
