@@ -30,7 +30,7 @@ class ActivityView(ModelView):
 
 class HistoryView(ModelView):
     datamodel = SQLAInterface(History)
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    #base_filters = [['created_by', FilterEqualFunction, get_user]]
 
 
 
