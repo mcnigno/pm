@@ -7,6 +7,7 @@ def upload_project():
         for line in prj:
                 row = Project(project=line)
                 session.add(row)
+        prj.created_by_fk = '1'
         session.commit()
 
 def upload_activity():
@@ -15,6 +16,7 @@ def upload_activity():
         for line in prj:
                 row = Activity(activity=line)
                 session.add(row)
+        prj.created_by_fk = '1'
         session.commit()
 
 def upload_history():
