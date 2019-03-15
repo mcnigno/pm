@@ -49,7 +49,7 @@ def page_not_found(e):
     return render_template('404.html', base_template=appbuilder.base_template, appbuilder=appbuilder), 404
 
 db.create_all()
-upload_project()
-upload_activity()
+#upload_project()
+#upload_activity()
 
 
