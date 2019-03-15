@@ -37,9 +37,9 @@ class HistoryView(ModelView):
     edit_columns = ['date','project','activity','quantity']
     add_columns = ['date','project','activity','quantity']
 
-appbuilder.add_view(ProjectView, "Project", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
-appbuilder.add_view(ActivityView, "Activity", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
-appbuilder.add_view(HistoryView, "History", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
+appbuilder.add_view(ProjectView, "Project", icon="fa-folder-open-o", category="Project", category_icon='fa-folder-open-o')
+appbuilder.add_view(ActivityView, "Activity", icon="fa-folder-open-o", category="Project", category_icon='fa-folder-open-o')
+appbuilder.add_view(HistoryView, "Task", icon="fa-folder-open-o", category="Pending Task", category_icon='fa-folder-open-o')
 
 """
     Application wide 404 error handler
