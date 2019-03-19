@@ -28,7 +28,7 @@ class Activity(Model, AuditMixin):
 
 class History(Model, AuditMixin):
     id = Column(Integer, primary_key=True)
-    date = Column(Date, default=datetime.datetime.now().strftime('%Y-%m-%d'), nullable=False)
+    date = Column(Date, default=datetime.date.today, nullable=False)
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False)
     project = relationship(Project)
     activity_id = Column(Integer, ForeignKey('activity.id'), nullable=False)
