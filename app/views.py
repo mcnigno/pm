@@ -121,7 +121,7 @@ class TasksView(ModelView):
     
     def post_add(self,item):
         session = db.session
-        session.query(Billitem).filter(Billitem.tasks_id == items.id).delete()
+        session.query(Billitem).filter(Billitem.tasks_id == item.id).delete()
         update_billable(item)
         
 
