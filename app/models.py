@@ -1,6 +1,6 @@
 from flask_appbuilder import Model
 from flask_appbuilder.models.mixins import AuditMixin, FileColumn, ImageColumn, DateTime
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text, Float, Boolean
 from sqlalchemy.orm import relationship
 import datetime
 from app import db
@@ -40,6 +40,8 @@ class Activity(Model, AuditMixin):
     name = Column(String(255), nullable=False)
     project_id = Column(Integer, ForeignKey('project.id'), nullable=False)
     project = relationship(Project)
+    cuo = Column(String(255), nullable=False)
+    attachment_required = Column(Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return self.name
@@ -81,8 +83,8 @@ class Cuos(Model, AuditMixin):
     date = Column(Date, default=datetime.today, nullable=False)
     code = Column(String(5), nullable=False)
     description = Column(String(255), nullable=False)
-    project_id = Column(Integer, ForeignKey('project.id'), nullable=False)
-    project = relationship(Project)
+    activity_id = Column(Integer, ForeignKey('activity.id'), nullable=False)
+    activity = relationship(Activity)
     
     def __repr__(self):
         return self.code
@@ -130,7 +132,7 @@ class Billitem(Model, AuditMixin):
     date = Column(Date, default=datetime.today, nullable=False)
     tasks_id = Column(Integer, ForeignKey('tasks.id'), nullable=False)
     tasks = relationship(Tasks)
-    item = Column(String(255), nullable=False)
+    item = Column(String(255), nullable=False, unique=True)
     time = Column(Float, nullable=False)
     comments = Column(Text)
     timesheet_id = Column(Integer, ForeignKey('timesheet.id'), nullable=False)

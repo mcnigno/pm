@@ -31,30 +31,53 @@ def upload_history():
         activities = dict([(x.activity, x.id) for x in session.query(Activity).all()])
         act = open('xls/history.csv')
 
+from zip_helper import read_zip
 def update_billable(items):
         session = db.session
-        bill_file = openpyxl.load_workbook(UPLOAD_FOLDER + items.billable)
-        bill_ws = bill_file.active
-        
-        for row in bill_ws.iter_rows(min_row=4):
-                print(row[0].value)
-                if row[0].value and row[1].value:
-                        if row[2].value is None:
-                                billitem = Billitem(
-                                                tasks_id=items.id,
-                                                timesheet_id=items.timesheet_id,
-                                                item=row[0].value,
-                                                time=row[1].value,
-                                                comments=''
-                                                )
-                                session.add(billitem)
-                        else:
-                                billitem = Billitem(
-                                                tasks_id=items.id,
-                                                timesheet_id=items.timesheet_id,
-                                                item=row[0].value,
-                                                time=row[1].value,
-                                                comments=row[2].value
-                                                )
-                                session.add(billitem)
+        file_list = read_zip(items.billable)
+        for file in file_list:
+            if file[:2] != '__':
+                if file == 'tr.xlsx':
+                        print('file:',file)
+                        bill_file = openpyxl.load_workbook(UPLOAD_FOLDER + items.billable)
+                        bill_ws = bill_file.active
+                        
+                        for row in bill_ws.iter_rows(min_row=4):
+                                print(row[0].value)
+                                if row[0].value and row[1].value:
+                                        if row[2].value is None:
+                                                billitem = Billitem(
+                                                                tasks_id=items.id,
+                                                                timesheet_id=items.timesheet_id,
+                                                                item=row[0].value,
+                                                                time=row[1].value,
+                                                                comments=''
+                                                                )
+                                                session.add(billitem)
+                                        else:
+                                                billitem = Billitem(
+                                                                tasks_id=items.id,
+                                                                timesheet_id=items.timesheet_id,
+                                                                item=row[0].value,
+                                                                time=row[1].value,
+                                                                comments=row[2].value
+                                                                )
+                                                session.add(billitem)
+
+                else:
+                        billitem = Billitem(
+                                tasks_id=items.id,
+                                timesheet_id=items.timesheet_id,
+                                item=file,
+                                time='0,25',
+                                comments=''
+                                )
+                        session.add(billitem)
+
+
         session.commit() 
+
+
+
+
+                        

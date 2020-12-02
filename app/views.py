@@ -66,21 +66,21 @@ class TasksView(ModelView):
     
     list_columns = ['project','activity','cuos', 'date_from','date_to','time','total_bill_time', 'task_vs_bill']
     base_filters = [['created_by', FilterEqualFunction, get_user]]
-    add_columns = ['date_from','date_to', 'project','activity','timesheet', 'cuos', 'billable' ]
+    add_columns = ['date_from','date_to', 'project','activity','timesheet','cuos', 'billable' ]
     add_form_extra_fields = {
                     'project': AJAXSelectField('Project',
                     description='This will be populated with AJAX',
                     datamodel=datamodel,
                     col_name='project',
                     widget=Select2AJAXWidget(endpoint='/tasksview/api/column/add/project')),
-
+                    '''
                     'cuos': AJAXSelectField('CUO',
                     description='Extra Field description',
                     datamodel=datamodel,
                     col_name='cuos',
                     widget=Select2SlaveAJAXWidget(master_id='project',
                     endpoint='/tasksview/api/column/add/cuos?_flt_0_project_id={{ID}}')),
-
+                    '''
                     'activity': AJAXSelectField('Activity',
                     description='Extra Field description',
                     datamodel=datamodel,
@@ -95,14 +95,14 @@ class TasksView(ModelView):
                     datamodel=datamodel,
                     col_name='project',
                     widget=Select2AJAXWidget(endpoint='/tasksview/api/column/add/project')),
-
+                    '''
                     'cuos': AJAXSelectField('CUO',
                     description='Extra Field description',
                     datamodel=datamodel,
                     col_name='cuos',
                     widget=Select2SlaveAJAXWidget(master_id='project',
                     endpoint='/tasksview/api/column/add/cuos?_flt_0_project_id={{ID}}')),
-
+                    '''
                     'activity': AJAXSelectField('Activity',
                     description='Extra Field description',
                     datamodel=datamodel,
@@ -153,7 +153,7 @@ class CuosView(ModelView):
 class ProjectView(ModelView):
     datamodel = SQLAInterface(Project)
     list_columns = ['name']
-    related_views = [ActivityView,CuosView, KpiView]
+    related_views = [ActivityView,KpiView]
 
 
 appbuilder.add_view(ProjectView, "Project", icon="fa-folder-open-o", category="Project", category_icon='fa-folder-open-o')
