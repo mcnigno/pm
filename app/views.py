@@ -88,7 +88,7 @@ class TasksView(ModelView):
                     widget=Select2SlaveAJAXWidget(master_id='project',
                     endpoint='/tasksview/api/column/add/activity?_flt_0_project_id={{ID}}'))
                     } 
-    edit_columns = ['date_from','date_to', 'project','activity','timesheet', 'cuos','billable' ]
+    edit_columns = ['date_from','date_to', 'project','activity','timesheet', 'cuos','billable']
     edit_form_extra_fields = {
                     'project': AJAXSelectField('Project',
                     description='This will be populated with AJAX',
@@ -119,10 +119,13 @@ class TasksView(ModelView):
         return redirect(self.get_redirect())
     
     
-    def post_add(self,item):
+    def post_update(self,item):
+        print('******** ********* ********** ******** start billable update')
         session = db.session
         session.query(Billitem).filter(Billitem.tasks_id == item.id).delete()
+        
         update_billable(item)
+        print('******** ********* ********** ******** start billable update')
         
 
 

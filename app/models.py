@@ -5,6 +5,8 @@ from sqlalchemy.orm import relationship
 import datetime
 from app import db
 from flask_appbuilder.filemanager import get_file_original_name
+
+
 """
 
 You can use the extra Flask-AppBuilder fields and Mixin's
@@ -135,5 +137,5 @@ class Billitem(Model, AuditMixin):
     item = Column(String(255), nullable=False, unique=True)
     time = Column(Float, nullable=False)
     comments = Column(Text)
-    timesheet_id = Column(Integer, ForeignKey('timesheet.id'), nullable=False)
-    timesheet = relationship(Timesheet)
+    timesheet_id = Column(Integer, ForeignKey('timesheet.id', ondelete="CASCADE"), nullable=False)
+    timesheet = relationship(Timesheet) 

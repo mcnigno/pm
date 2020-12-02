@@ -32,50 +32,69 @@ def upload_history():
         act = open('xls/history.csv')
 
 from zip_helper import read_zip
+
 def update_billable(items):
-        session = db.session
-        file_list = read_zip(items.billable)
-        for file in file_list:
-            if file[:2] != '__':
-                if file == 'tr.xlsx':
-                        print('file:',file)
-                        bill_file = openpyxl.load_workbook(UPLOAD_FOLDER + items.billable)
-                        bill_ws = bill_file.active
-                        
-                        for row in bill_ws.iter_rows(min_row=4):
-                                print(row[0].value)
-                                if row[0].value and row[1].value:
-                                        if row[2].value is None:
-                                                billitem = Billitem(
-                                                                tasks_id=items.id,
-                                                                timesheet_id=items.timesheet_id,
-                                                                item=row[0].value,
-                                                                time=row[1].value,
-                                                                comments=''
-                                                                )
-                                                session.add(billitem)
-                                        else:
-                                                billitem = Billitem(
-                                                                tasks_id=items.id,
-                                                                timesheet_id=items.timesheet_id,
-                                                                item=row[0].value,
-                                                                time=row[1].value,
-                                                                comments=row[2].value
-                                                                )
-                                                session.add(billitem)
-
-                else:
+    session = db.session
+    print('update billable started')
+    print('file path', UPLOAD_FOLDER,'file', items.billable)
+    zip_items = read_zip(UPLOAD_FOLDER + items.billable)
+    file_list = zip_items[0]
+    try:
+        print('tr file?',zip_items[1])
+        tr_file = zip_items[1]
+        print('open TR.XLSX file')
+        bill_file = openpyxl.load_workbook(tr_file)
+        print('TR.XLSX file OPEND')
+        bill_ws = bill_file.active
+        
+        for row in bill_ws.iter_rows(min_row=4):
+                print(row[0].value)
+                if row[0].value and row[1].value:
+                    if row[2].value is None:
                         billitem = Billitem(
-                                tasks_id=items.id,
-                                timesheet_id=items.timesheet_id,
-                                item=file,
-                                time='0,25',
-                                comments=''
-                                )
-                        session.add(billitem)
+                                        tasks_id=items.id,
+                                        timesheet_id=items.timesheet_id,
+                                        item=row[0].value,
+                                        time=row[1].value,
+                                        comments=''
+                                        )
+
+                        #session.add(billitem)
+                    else:
+                        billitem = Billitem(
+                                        tasks_id=items.id,
+                                        timesheet_id=items.timesheet_id,
+                                        item=row[0].value,
+                                        time=row[1].value,
+                                        comments=row[2].value
+                                        )
+                    billitem.created_by_fk = '1'
+                    billitem.changed_by_fk = '1'
+                    session.add(billitem)
+                    print('added:',billitem)
+                session.commit()
+    except:
+        print('EXCEPTION')
+        pass
+    for file in file_list:
+        
+        if file[:2] != '__' and '.' in file and file[-7:] != 'tr.xlsx':
+            print(file)
+            billitem = Billitem(
+                    tasks_id=items.id,
+                    timesheet_id=items.timesheet_id,
+                    item=file,
+                    time='0,25',
+                    comments=''
+                    )
+            billitem.created_by_fk = '1'
+            billitem.changed_by_fk = '1'
+            session.add(billitem)
+            print('added:',billitem)
 
 
-        session.commit() 
+    session.commit()
+    print('session committed **** ----- ////') 
 
 
 
