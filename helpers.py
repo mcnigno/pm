@@ -32,7 +32,8 @@ def upload_history():
         act = open('xls/history.csv')
 
 from zip_helper import read_zip
-
+from flask_appbuilder.security.sqla.manager import User
+from flask import flash
 def update_billable(items):
     session = db.session
     print('update billable started')
@@ -68,27 +69,35 @@ def update_billable(items):
                                         time=row[1].value,
                                         comments=row[2].value
                                         )
+                    '''
                     billitem.created_by_fk = '1'
                     billitem.changed_by_fk = '1'
-                    session.add(billitem)
-                    print('added:',billitem)
-                session.commit()
+                    '''
+                    # add only if the item is unique
+                    item = session.query(Billitem).filter(Billitem.item == row[0].value).first()
+                    if item is not None:
+                        user = session.query(User).filter(User.id == item.change_by_fk).first()
+                        message = item.item + ' has been already billed by ' + user.first_name + ' ' + user.last_name + ' '+str(item.changed_on)
+                        flash(message=message, category='info')
+                    else:
+                        session.add(billitem)
+                        print('added:',billitem)
+                #session.commit()
     except:
         print('EXCEPTION')
         pass
+    
     for file in file_list:
         
-        if file[:2] != '__' and '.' in file and file[-7:] != 'tr.xlsx':
+        if file[:2] != '__' and '.' in file:
             print(file)
             billitem = Billitem(
                     tasks_id=items.id,
                     timesheet_id=items.timesheet_id,
                     item=file,
-                    time='0,25',
+                    time='0.25',
                     comments=''
                     )
-            billitem.created_by_fk = '1'
-            billitem.changed_by_fk = '1'
             session.add(billitem)
             print('added:',billitem)
 
