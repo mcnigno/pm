@@ -211,7 +211,7 @@ class Billitem(Model, AuditMixin):
     tasks = relationship(Tasks)
     deliverable = Column(String(255), nullable=False)
     doc_quantity = Column(Integer,nullable=False)
-    item = Column(String(255), nullable=False)
+    item = Column(String(255), nullable=True)
     time = Column(Float, nullable=False)
     comments = Column(Text)
     timesheet_id = Column(Integer, ForeignKey('timesheet.id'), nullable=False)
