@@ -1,9 +1,7 @@
-
-'''
+from flask import redirect
+from flask_appbuilder.security.views import UserDBModelView
 from flask_appbuilder.security.sqla.manager import SecurityManager
-#from flask_appbuilder.actions import action
-from .sec_models import MyUser
-from .sec_views import MyUserDBModelView
+from flask_appbuilder.actions import action
 
 
 class MyUserDBView(UserDBModelView):
@@ -15,7 +13,4 @@ class MyUserDBView(UserDBModelView):
 
 
 class MySecurityManager(SecurityManager):
-    user_model = MyUser
-    userdbmodelview = MyUserDBModelView
-
-'''
+    userdbmodelview = MyUserDBView

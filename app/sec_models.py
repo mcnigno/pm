@@ -1,10 +1,10 @@
-'''
 from flask_appbuilder.security.sqla.models import User
 from sqlalchemy import Column, Integer, ForeignKey, String, Sequence, Table
 from sqlalchemy.orm import relationship, backref
 from flask_appbuilder import Model
-
+from flask_appbuilder.models.mixins import AuditMixin, FileColumn, ImageColumn, DateTime
 from .models import Activity
+
 
 
 assoc_activity_users = Table('activity_users', Model.metadata,
@@ -16,7 +16,4 @@ assoc_activity_users = Table('activity_users', Model.metadata,
 class MyUser(User):
     __tablename__ = 'ab_user'
     extra = Column(String(256))
-    #activity = relationship("Activity",secondary=assoc_activity_users, backref="users" )
-
-
-'''
+    activity = relationship("Activity",secondary=assoc_activity_users, backref="users" )

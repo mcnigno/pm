@@ -1,4 +1,3 @@
-'''
 from flask_appbuilder.security.views import UserDBModelView
 from flask_babel import lazy_gettext
 
@@ -23,7 +22,7 @@ class MyUserDBModelView(UserDBModelView):
         (lazy_gettext('User info'),
          {'fields': ['username', 'active', 'roles', 'login_count', 'extra']}),
         (lazy_gettext('Personal Info'),
-         {'fields': ['first_name', 'last_name', 'email', 'activity'], 'expanded': True}),
+         {'fields': ['first_name', 'last_name', 'email'], 'expanded': True}),
     ]
 
     add_columns = [
@@ -33,7 +32,8 @@ class MyUserDBModelView(UserDBModelView):
         'active',
         'email',
         'roles',
-        'activity'
+        'extra',
+        'activity',
         'password',
         'conf_password'
     ]
@@ -52,7 +52,6 @@ class MyUserDBModelView(UserDBModelView):
         'active',
         'email',
         'roles',
+        'extra',
         'activity'
     ]
-
-'''

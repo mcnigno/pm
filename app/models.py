@@ -1,17 +1,19 @@
 from flask_appbuilder import Model
 from flask_appbuilder.models.mixins import AuditMixin, FileColumn, ImageColumn, DateTime
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text, Float, Boolean 
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text, Float, Boolean, Table
+from flask_appbuilder.security.sqla.models import User
 from sqlalchemy.orm import column_property, relationship
 import datetime
 
 from sqlalchemy.sql.expression import column
-from app import db
+#from app import db
 from flask_appbuilder.filemanager import get_file_original_name
 from flask_appbuilder.models.decorators import renders
 
 from datetime import datetime
 from datetime import timedelta
 import time
+
 
 def minutes_between(d1, d2):
 
@@ -91,6 +93,7 @@ class Contact(Model, AuditMixin):
     def __repr__(self):
         return self.name
 
+
 class Activity_type(Model, AuditMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
@@ -138,20 +141,24 @@ class Kpi(Model, AuditMixin):
 class Timesheet(Model, AuditMixin):
     id = Column(Integer, primary_key=True)
     date = Column(Date, default=datetime.today().date, nullable=False)
-    status_id = Column(Integer, ForeignKey('status.id'), nullable=False)
+    status_id = Column(Integer, ForeignKey('status.id'), nullable=False, default=1)
     status = relationship(Status)
     
     def total_time(self):
+        from app import db
         session = db.session
         task = session.query(Tasks).filter(Tasks.timesheet_id == self.id).all()
         tot_time = sum([(x.date_to - x.date_from) for x in task], timedelta())
         return tot_time
     
     def total_bill_time(self):
+        from app import db
         session = db.session
-        billitems = session.query(Billitem).filter(Billitem.timesheet_id == self.id).all()
-        tot_bill_time = sum([x.time for x in billitems])
-        return timedelta(minutes=tot_bill_time * 60)
+        tasks = session.query(Tasks).filter(Tasks.timesheet_id == self.id).all()
+        tot_bill_time = sum([int(x.total_bill_time().total_seconds()) for x in tasks])
+        #billitems = session.query(Billitem).filter(Billitem.timesheet_id == self.id).all()
+        #tot_bill_time = sum([x.time for x in billitems])
+        return timedelta(minutes=tot_bill_time / 60)
     
     def __repr__(self):
         return self.date.strftime("%d %b, %Y")
@@ -184,6 +191,7 @@ class Tasks(Model, AuditMixin):
             return get_file_original_name(self.billable)
     
     def total_bill_time(self):
+        from app import db
         session = db.session
         billitems = session.query(Billitem).filter(Billitem.tasks_id == self.id).all()
         tot_bill_time = sum([x.time for x in billitems])
@@ -210,14 +218,14 @@ class Billitem(Model, AuditMixin):
     tasks_id = Column(Integer, ForeignKey('tasks.id'), nullable=False)
     tasks = relationship(Tasks)
     deliverable = Column(String(255), nullable=False)
-    doc_quantity = Column(Integer,nullable=False)
+    doc_quantity = Column(Integer,nullable=False, default=1)
     item = Column(String(255), nullable=True)
     time = Column(Float, nullable=False)
-    comments = Column(Text)
-    timesheet_id = Column(Integer, ForeignKey('timesheet.id'), nullable=False)
-    timesheet = relationship(Timesheet) 
+    comments = Column(Text) 
     sal_id = Column(Integer, ForeignKey('sal.id'), nullable=True)
     sal = relationship(Sal)
     detail_file = Column(FileColumn, nullable=True)
     status_id = Column(Integer, ForeignKey('status.id'), nullable=True)
     status = relationship(Status) 
+
+

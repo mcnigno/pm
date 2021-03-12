@@ -1,3 +1,4 @@
+from logging import exception
 from flask import render_template, g
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView
@@ -5,7 +6,7 @@ from app import appbuilder, db
 import app
 from .models import Project, Activity, Kpi, Timesheet, Billitem, Tasks, Cuos, Activity_type, Customer, Order, Sal, Contact, Rate, Status
 from helpers import upload_project, upload_activity
-from flask_appbuilder.models.sqla.filters import FilterStartsWith, FilterEqualFunction, FilterEqual
+from flask_appbuilder.models.sqla.filters import FilterStartsWith, FilterEqualFunction, FilterEqual, FilterInFunction
 from flask_appbuilder.fields import AJAXSelectField
 from flask_appbuilder.fieldwidgets import Select2AJAXWidget, Select2ManyWidget, Select2SlaveAJAXWidget, DateTimePickerWidget
 from flask_appbuilder.actions import action
@@ -18,6 +19,9 @@ from flask_appbuilder import AppBuilder, BaseView, expose, has_access
 def get_user():
     return g.user
 
+def get_activity():
+    return [x.name for x in g.user.activity]
+
 class Activity_typeView(ModelView):
     datamodel = SQLAInterface(Activity_type)
     list_columns = ['name']
@@ -26,7 +30,7 @@ class BillitemView(ModelView):
     datamodel = SQLAInterface(Billitem)
     base_filters = [['created_by', FilterEqualFunction, get_user]]
     list_columns = ['deliverable','item','time','comments']
-    add_columns = ['tasks','item','time','comments']
+    add_columns = ['tasks', 'deliverable', 'doc_quantity' ,'item','time','comments']
 
 class TasksView(ModelView):
     datamodel = SQLAInterface(Tasks)
@@ -44,6 +48,7 @@ class TasksView(ModelView):
     
     list_columns = ['activity', 'dfrom','dto','time','total_bill_time', 'task_vs_bill']
     base_filters = [['created_by', FilterEqualFunction, get_user]]
+    add_form_query_rel_fields = {'activity':[['name', FilterInFunction, get_activity]]}
     add_columns = ['date_from','date_to',  'activity','timesheet','billable' ]
     
     edit_columns = ['date_from','date_to','activity','timesheet', 'billable']
@@ -63,7 +68,13 @@ class TasksView(ModelView):
         print('pre add function')
         return super().pre_add(item)
     '''
-    
+    def pre_add(self, item):
+        from flask import abort, Response, flash
+        
+        if item.date_from > item.date_to:
+            flash('Wrong dates! Task failed.', category='warning')
+            abort(400)
+
 
     def post_add(self, item):
         if item.billable is not None:
@@ -90,7 +101,7 @@ class TimesheetView(ModelView):
         'total_bill_time': 'Bill Time'
     
     }
-    add_columns = ['date','status']
+    add_columns = ['date']
     edit_columns = ['date','status']
     list_columns = ['ts_date','total_time','total_bill_time']
     show_columns = ['ts_date','total_time','total_bill_time']
@@ -113,10 +124,12 @@ class KpiView(ModelView):
 class ActivityView(ModelView):
     datamodel = SQLAInterface(Activity)
     list_columns = ['name']
+    
 
 class CuosView(ModelView):
     datamodel = SQLAInterface(Cuos)
     related_views = [ActivityView]
+    list_columns = ['project','code']
 
 class ProjectView(ModelView):
     datamodel = SQLAInterface(Project)
@@ -173,8 +186,8 @@ class AppView(BaseView):
         return self.render_template('timesheet.html',
                            param1 = param1)
     '''    
-appbuilder.add_view(AppView, "AppHome", category='TS APP')
-appbuilder.add_link("Home", href='/app/1', category='TS APP')
+#appbuilder.add_view(AppView, "AppHome", category='TS APP')
+#appbuilder.add_link("Home", href='/app/1', category='TS APP')
 
 ############
 ############
@@ -211,4 +224,5 @@ db.create_all()
 #upload_project()
 #upload_activity()
 
-
+from helpers import upload_pm_items
+upload_pm_items() 

@@ -1,8 +1,9 @@
-from app.models import Project, Activity, Billitem
+from app.models import Project, Activity, Billitem, Customer, Order, Cuos
 from app import db
 import openpyxl
 from config import UPLOAD_FOLDER
 from datetime import timedelta, datetime
+from openpyxl import load_workbook
 
 def upload_project():
         session = db.session
@@ -30,6 +31,24 @@ def upload_history():
         projects = dict([(x.project, x.id) for x in session.query(Project).all()])
         activities = dict([(x.activity, x.id) for x in session.query(Activity).all()])
         act = open('xls/history.csv')
+
+def upload_pm_items():
+    session = db.session
+    wb = load_workbook('xls/PM_items.xlsx')
+    ws = wb.active
+    for row in ws.iter_rows(min_row=2):
+        customer = row[0].value
+        order = row[1].value 
+        project = row[2].value
+        cuo = row[3].value
+        activity = row[4].value
+        activity_type = row[5].value
+
+        
+
+
+
+
 
 from zip_helper import read_zip
 from flask_appbuilder.security.sqla.manager import User
@@ -65,7 +84,7 @@ def update_billable(items):
                         if row[2].value is None:
                             billitem = Billitem(
                                             tasks_id=items.id,
-                                            timesheet_id=items.timesheet_id,
+                                            #timesheet_id=items.timesheet_id,
                                             deliverable = row[0].value,
                                             doc_quantity = row[1].value,
                                             item=row[2].value,
@@ -77,7 +96,7 @@ def update_billable(items):
                         else:
                             billitem = Billitem(
                                             tasks_id=items.id,
-                                            timesheet_id=items.timesheet_id,
+                                            #timesheet_id=items.timesheet_id,
                                             deliverable = row[0].value,
                                             doc_quantity = row[1].value,
                                             item=row[2].value,
@@ -107,7 +126,7 @@ def update_billable(items):
                 print(file)
                 billitem = Billitem(
                         tasks_id=items.id,
-                        timesheet_id=items.timesheet_id,
+                        #timesheet_id=items.timesheet_id,
                         deliverable = 'ND',
                         item=file,
                         time='0.25',
