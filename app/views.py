@@ -2,7 +2,7 @@ from logging import exception
 from flask import render_template, g
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import ModelView
-#from flask_appbuilder.security.decorators import protect
+from flask_appbuilder.security.decorators import protect
 from app import appbuilder, db
 import app
 from .models import Project, Activity, Kpi, Timesheet, Tasks, Cuos, Activity_type, Customer, Order, Sal, Contact, Rate, Status, Tsfiles
@@ -281,7 +281,7 @@ class ProjectModelApi(ModelRestApi):
     datamodel = SQLAInterface(Project)
 
     @expose('/all')
-    #@protect()
+    @protect()
     def all(self):
         return self.response(200, message="This is ALL")
 
