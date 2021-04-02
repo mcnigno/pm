@@ -1,4 +1,8 @@
-from app.models import Project, Activity, Billitem, Customer, Order, Cuos
+from time import strptime
+from sqlalchemy.sql.sqltypes import Time
+#from app.views import get_user
+from os import abort, name
+from app.models import Project, Activity, Customer, Order, Cuos, Tasks, Timesheet
 from app import db
 import openpyxl
 from config import UPLOAD_FOLDER
@@ -44,16 +48,18 @@ def upload_pm_items():
         activity = row[4].value
         activity_type = row[5].value
 
-        
+from flask import g      
+def get_user_id():
+    return g.user.id
 
-
-
+def get_user():
+    return g.user
 
 
 from zip_helper import read_zip
 from flask_appbuilder.security.sqla.manager import User
 from flask import flash 
-
+'''
 def check_tbd(item, deliverable):
     # verifica l'esistenza di billables/items con transmittal TBD (to be defined) e ne aggiorna il transmittal
     session = db.session
@@ -74,7 +80,7 @@ def update_billable(items):
     elif str(items.billable).split('_sep_')[1] == 'tr.xlsx':
         try:
             print('open TR.XLSX file')
-            bill_file = openpyxl.load_workbook(UPLOAD_FOLDER + items.billable)
+            ts = openpyxl.load_workbook(UPLOAD_FOLDER + items.billable)
             print('TR.XLSX file OPEND')
             bill_ws = bill_file.active
         
@@ -103,10 +109,7 @@ def update_billable(items):
                                             time=row[3].value,
                                             comments=row[4].value
                                             )
-                        '''
-                        billitem.created_by_fk = '1'
-                        billitem.changed_by_fk = '1'
-                        '''
+                        
                         # add only if the deliverable is unique
                         billables = session.query(Billitem).filter(Billitem.item == billitem.item, Billitem.deliverable == 'TBD').all()
                         for bill in billables:
@@ -141,8 +144,88 @@ def update_billable(items):
 
     session.commit()
     print('session committed **** ----- ////') 
+'''
 
-
+def tasks_update(self,item):
+    session = db.session
+    print('update tasks started')
+    session.query(Tasks).delete()
+    print('file path', UPLOAD_FOLDER,'file', item.file)
+    file_list = []
+    if str(item.file).split('.')[1] != 'xlsx':
+        flash('Your TimeSheet in not in XLSX format.')
+        abort(302, 'Invalid Timesheet Format')
+                                                
+    else:
+        print('*********')
+        print('*******',(UPLOAD_FOLDER + item.file))
+        filepath = UPLOAD_FOLDER + item.file
+        
+        ts_file = openpyxl.load_workbook(filepath, read_only=True, data_only=True )
+        
+        print('Ts File file OPEND')
+        ts_ws = ts_file.active
+        row_count = 1
+        
+        for row in ts_ws.iter_rows(min_row=2):
+            try:
+                row_count += 1
+                print(row_count)
+                print(row[0].value)
+                print(row[1].value)
+                print(row[2].value)
+                
+                if row[0].value and row[1].value and row[2].value:
+                    print('here we are ............... -1 for user id:',get_user_id())
+                    # If Timesheet for this user is not there create a new one.
+                    try:
+                        print('try query timesheet')
+                        this_ts = session.query(Timesheet).filter(Timesheet.created_by_fk== get_user_id(), Timesheet.date == str(row[0].value) ).first()
+                    except:
+                        print('query ts wrong ')
+                    if this_ts is None:
+                        print('this_ts is none')
+                        this_ts = Timesheet(
+                            date = row[0].value,
+                            status_id = 1
+                        )
+                    print('Check and set the Activity/Product')
+                    this_activity = session.query(Activity).filter(Activity.name == row[3].value).first()
+                    if this_activity is None:
+                        print('this_activity is none')
+                        #flash('Activity "'+ row[3].value + '" not found.'+' Row:'+row_count, category='warning' )
+                        #return abort(302, 'Product/Activity not Found')
+                        ### FAKE TEST ACCEPT NEW ACTIVITY
+                        this_activity = Activity(
+                            name = row[3].value,
+                            cuos_id = 1,
+                            activity_type_id = 1,
+                            status_id = 1,
+                            bill_file_required = True
+                        )
+                    print('here we are.........2',str(row[0].value)[:10])
+                    print(str(row[0].value)[:10] + " " + str(row[1].value))
+                    print(row[1].value)
+                    taskitem = Tasks(
+                                    timesheet = this_ts,
+                                    activity = this_activity,
+                                    date_from = str(row[0].value)[:10] + " " + str(row[1].value),
+                                    date_to = str(row[0].value)[:10] + " " + str(row[2].value),
+                                    sal_item = row[4].value,
+                                    ref_item= row[5].value,
+                                    doc_quantity = row[6].value,
+                                    comments=row[9].value
+                                    )
+                    print('here we are.........3')
+                    session.add(taskitem)
+                    session.commit()
+                    print('here we are.........4')
+            except Exception as e:
+                print('something goes wrong :(')
+                print(e)
+    #session.commit()
+    print('session committed **** ----- ////')
+    return flash('Timesheet updated with ' + str(row_count) + ' tasks.') 
 
 
                         

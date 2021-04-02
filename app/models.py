@@ -1,3 +1,4 @@
+#from app.views import get_user
 from flask_appbuilder import Model
 from flask_appbuilder.models.mixins import AuditMixin, FileColumn, ImageColumn, DateTime
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text, Float, Boolean, Table
@@ -13,6 +14,7 @@ from flask_appbuilder.models.decorators import renders
 from datetime import datetime
 from datetime import timedelta
 import time
+from flask import jsonify
 
 
 def minutes_between(d1, d2):
@@ -137,20 +139,31 @@ class Kpi(Model, AuditMixin):
     def __repr__(self):
         return self.name
 
+from flask_appbuilder.filemanager import get_file_original_name
+
+class Tsfiles(Model, AuditMixin):
+    id = Column(Integer, primary_key=True)
+    file = Column(FileColumn, nullable=False)
+    
+    def __repr__(self):
+        return get_file_original_name(self.file)
+
 
 class Timesheet(Model, AuditMixin):
     id = Column(Integer, primary_key=True)
     date = Column(Date, default=datetime.today().date, nullable=False)
-    status_id = Column(Integer, ForeignKey('status.id'), nullable=False, default=1)
+    status_id = Column(Integer, ForeignKey('status.id'))
     status = relationship(Status)
+
     
     def total_time(self):
         from app import db
         session = db.session
         task = session.query(Tasks).filter(Tasks.timesheet_id == self.id).all()
         tot_time = sum([(x.date_to - x.date_from) for x in task], timedelta())
-        return tot_time
+        return str(tot_time)
     
+    '''
     def total_bill_time(self):
         from app import db
         session = db.session
@@ -158,20 +171,22 @@ class Timesheet(Model, AuditMixin):
         tot_bill_time = sum([int(x.total_bill_time().total_seconds()) for x in tasks])
         #billitems = session.query(Billitem).filter(Billitem.timesheet_id == self.id).all()
         #tot_bill_time = sum([x.time for x in billitems])
-        return timedelta(minutes=tot_bill_time / 60)
-    
+        
+        return str(timedelta(minutes=tot_bill_time / 60))
+    '''
     def __repr__(self):
         return self.date.strftime("%d %b, %Y")
     
     @renders('date')
     def ts_date(self):
     # will render this columns as bold on ListWidget
-        return self.date.strftime("%A %d %B, %Y")
+        #return self.date.strftime("%A %d %B, %Y")
+        return self.date
 
 from flask_appbuilder.models.decorators import renders
 
 
-class Tasks(Model, AuditMixin):
+class Tasks(Model, AuditMixin): 
     id = Column(Integer, primary_key=True)
     activity_id = Column(Integer, ForeignKey('activity.id'), nullable=False)
     activity = relationship(Activity)
@@ -179,17 +194,27 @@ class Tasks(Model, AuditMixin):
     timesheet = relationship(Timesheet)
     date_from = Column(DateTime, default=datetime.today().strftime('%Y-%m-%d %H:%M:%S'), nullable=False)
     date_to = Column(DateTime, default=datetime.today().strftime('%Y-%m-%d %H:%M:%S'), nullable=False)
-    billable = Column(FileColumn, nullable=True)
-    status_id = Column(Integer, ForeignKey('status.id'), nullable=False, default=1)
+    attachment = Column(FileColumn, nullable=True)
+    status_id = Column(Integer, ForeignKey('status.id'))
     status = relationship(Status)
+    task_status = Column(String(255), nullable=True)
+    sal_id = Column(Integer, ForeignKey('sal.id'), nullable=True)
+    sal = relationship(Sal)
+    sal_item = Column(String(255), nullable=True)
+    doc_quantity = Column(Integer,nullable=True, default=1)
+    ref_item = Column(String(255), nullable=True)
+    time = Column(Float, nullable=True)
+    comments = Column(Text) 
+
  
     def time(self):
         return self.date_to - self.date_from
 
-    def bill_filename(self):
-        if self.billable: 
-            return get_file_original_name(self.billable)
+    def attachment_filename(self): 
+        if self.attachment: 
+            return get_file_original_name(self.attachment)
     
+    '''
     def total_bill_time(self):
         from app import db
         session = db.session
@@ -202,7 +227,7 @@ class Tasks(Model, AuditMixin):
         if difference.total_seconds() < 0:
             return 'Check Time'
         return difference
-    
+    '''
     def dfrom(self):
         return self.date_from.strftime("%A %d %B %y | %H:%M")
 
@@ -210,8 +235,22 @@ class Tasks(Model, AuditMixin):
         return self.date_to.strftime("%A %d %B %y | %H:%M")
     
     def __repr__(self):
-        return 'Task: '+ str(self.activity) + 'by '+ self.dfrom() + self.dto()
+        return 'Task: '+ str(self.activity) + 'by '+ get_user + ' | ' + self.dfrom() + ' ' + self.dto()
  
+class Salitem(Model, AuditMixin):
+    id = Column(Integer, primary_key=True)
+    item = Column(String(255), nullable=True, unique=True)
+    references = Column(String(255), nullable=False)
+    date = Column(Date, default=datetime.today, nullable=False)
+    sal_id = Column(Integer, ForeignKey('sal.id'), nullable=False)
+    sal = relationship(Sal)
+    kpi = Column(Integer, nullable=False)
+
+    def __repr__(self):
+        return self.item
+'''
+
+
 class Billitem(Model, AuditMixin):
     id = Column(Integer, primary_key=True)
     date = Column(Date, default=datetime.today, nullable=False)
@@ -222,10 +261,11 @@ class Billitem(Model, AuditMixin):
     item = Column(String(255), nullable=True)
     time = Column(Float, nullable=False)
     comments = Column(Text) 
-    sal_id = Column(Integer, ForeignKey('sal.id'), nullable=True)
-    sal = relationship(Sal)
+    salitem_id = Column(Integer, ForeignKey('salitem.id'), nullable=True)
+    salitem = relationship(Salitem)
     detail_file = Column(FileColumn, nullable=True)
     status_id = Column(Integer, ForeignKey('status.id'), nullable=True)
     status = relationship(Status) 
 
 
+'''

@@ -12,6 +12,7 @@ SQLALCHEMY_DATABASE_URI = 'mysql://root:lollipop300777@localhost/pm'
 
 # Flask-WTF flag for CSRF
 CSRF_ENABLED = True
+FAB_API_SWAGGER_UI = True
 
 #------------------------------
 # GLOBALS FOR APP Builder 
